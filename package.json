@@ -1,0 +1,47 @@
+{
+  "name": "dpns-client",
+  "version": "0.0.1",
+  "description": "Javascript client for DPNS dApp",
+  "main": "lib/DPNSClient.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "test": "npm run test:unit && npm run test:functional",
+    "test:unit": "mocha 'test/unit/**/*.spec.js'",
+    "test:functional": "mocha 'test/functional/**/*.spec.js'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dashevo/js-dpns-client.git"
+  },
+  "keywords": [
+    "dpns",
+    "client"
+  ],
+  "authors": [
+    "Djavid Gabibiyan"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dashevo/js-dpns-client/issues"
+  },
+  "homepage": "https://github.com/dashevo/js-dpns-client#readme",
+  "devDependencies": {
+    "@dashevo/dp-services-ctl": "^0.7.4",
+    "chai": "^4.2.0",
+    "dirty-chai": "^2.0.1",
+    "eslint": "^6.1.0",
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-plugin-import": "^2.18.2",
+    "mocha": "^6.2.0",
+    "multihashes": "^0.4.15"
+  },
+  "dependencies": {
+    "@dashevo/dapi-client": "^0.6.5",
+    "@dashevo/dashcore-lib": "^0.17.9",
+    "@dashevo/dpp": "^0.7.2"
+  }
+}
