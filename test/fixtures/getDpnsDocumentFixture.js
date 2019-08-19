@@ -1,7 +1,7 @@
 const { Transaction, PrivateKey } = require('@dashevo/dashcore-lib');
 const DocumentFactory = require('@dashevo/dpp/lib/document/DocumentFactory');
 const entropy = require('@dashevo/dpp/lib/util/entropy');
-const multihash = require('../../lib/utils/multihash');
+const { hash } = require('../../lib/utils/doubleSha256Multihash');
 const getDpnsContractFixture = require('./getDpnsContractFixture');
 
 const transaction = new Transaction().setType(Transaction.TYPES.TRANSACTION_SUBTX_REGISTER);
@@ -27,7 +27,7 @@ function getParentDocumentFixture(options = {}) {
   const normalizedLabel = options.normalizedLabel || label.toLowerCase();
   const fullDomainName = `${normalizedLabel}.grandparent`;
   const data = Object.assign({}, {
-    nameHash: multihash(Buffer.from(fullDomainName)).toString('hex'),
+    nameHash: hash(Buffer.from(fullDomainName)).toString('hex'),
     label,
     normalizedLabel,
     normalizedParentDomainName: 'grandparent',
@@ -60,7 +60,7 @@ function getChildDocumentFixture(options = {}) {
   const parentDomainName = `${parent.getData().normalizedLabel}.${parent.getData().normalizedParentDomainName}`;
   const fullDomainName = `${normalizedLabel}.${parentDomainName}`;
   const data = Object.assign({}, {
-    nameHash: multihash(Buffer.from(fullDomainName)).toString('hex'),
+    nameHash: hash(Buffer.from(fullDomainName)).toString('hex'),
     label,
     normalizedLabel,
     normalizedParentDomainName: parentDomainName,
