@@ -31,7 +31,6 @@
   "homepage": "https://github.com/dashevo/js-dpns-client#readme",
   "devDependencies": {
     "@dashevo/dp-services-ctl": "^0.7.4",
-    "@dashevo/dpns-contract": "^0.1.0",
     "chai": "^4.2.0",
     "dirty-chai": "^2.0.1",
     "eslint": "^6.1.0",
@@ -44,6 +43,7 @@
   "dependencies": {
     "@dashevo/dapi-client": "^0.6.5",
     "@dashevo/dashcore-lib": "^0.17.9",
+    "@dashevo/dpns-contract": "^0.1.0",
     "@dashevo/dpp": "^0.7.2",
     "multihashes": "^0.4.15"
   }
