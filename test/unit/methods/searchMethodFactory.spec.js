@@ -1,8 +1,8 @@
 const Document = require('@dashevo/dpp/lib/document/Document');
-const createDataProviderMock = require('../../mocks/createDataProviderMock');
+const createDataProviderMock = require('../../mocks/createDapiClientMock');
 const dpnsDocumentFixture = require('../../fixtures/getDpnsDocumentFixture');
-const getContractFixture = require('../../fixtures/getContractFixture');
 const searchMethodFactory = require('../../../lib/method/searchMethodFactory');
+const createDPPMock = require('../../mocks/createDPPMock');
 
 describe('searchMethodFactory', () => {
   let dapiClientMock;
@@ -13,10 +13,10 @@ describe('searchMethodFactory', () => {
     dapiClientMock = createDataProviderMock(this.sinon);
     parentDocument = dpnsDocumentFixture.getParentDocumentFixture();
     dapiClientMock.fetchDocuments.resolves([parentDocument.toJSON()]);
-
-    dppMock = {
-      getContract: getContractFixture,
-    };
+    dppMock = createDPPMock(this.sinon);
+    dppMock.getContract.returns({
+      getId: this.sinon.stub(),
+    });
   });
 
   it('should return function', () => {

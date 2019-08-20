@@ -4,6 +4,6 @@ const Contract = require('@dashevo/dpp/lib/contract/Contract');
 /**
  * @return {Contract}
  */
-module.exports = function getContractFixture() {
+module.exports = function getDpnsContractFixture() {
   return new Contract('dpnsContract', dpnsDocuments);
 };
