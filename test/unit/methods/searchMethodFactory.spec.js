@@ -23,11 +23,13 @@ describe('searchMethodFactory', () => {
     const searchMethod = searchMethodFactory(dapiClientMock, dppMock);
     const result = await searchMethod('labelPrefix', 'parentDomainName');
 
-    expect(result).to.be.an.instanceOf(Array);
+    expect(result).to.be.an('array');
     expect(result).to.have.lengthOf(1);
+
     expect(result[0]).to.be.instanceOf(Document);
     expect(result[0]).to.deep.include(parentDocument);
-    expect(dapiClientMock.fetchDocuments).to.be.calledOnceWith(
+
+    expect(dapiClientMock.fetchDocuments).to.have.been.calledOnceWith(
       dppMock.getContract().getId(),
       'domain',
       {

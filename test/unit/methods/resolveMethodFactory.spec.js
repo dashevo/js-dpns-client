@@ -9,24 +9,29 @@ describe('resolveMethodFactory', () => {
   let dapiClientMock;
   let dppMock;
   let parentDocument;
+  let resolveMethod;
 
   beforeEach(function beforeEach() {
     dapiClientMock = createDataProviderMock(this.sinon);
     parentDocument = dpnsDocumentFixture.getParentDocumentFixture();
     dapiClientMock.fetchDocuments.resolves([parentDocument.toJSON()]);
+
     dppMock = createDPPMock(this.sinon);
     dppMock.getContract.returns({
       getId: this.sinon.stub(),
     });
+
+    resolveMethod = resolveMethodFactory(dapiClientMock, dppMock);
   });
 
   it('should return a document', async () => {
-    const resolveMethod = resolveMethodFactory(dapiClientMock, dppMock);
     const name = 'name';
     const result = await resolveMethod(name);
 
     expect(result).to.be.an.instanceOf(Document);
-    expect(dapiClientMock.fetchDocuments).to.be.calledOnceWith(
+    expect(result).to.deep.equal(parentDocument);
+
+    expect(dapiClientMock.fetchDocuments).to.have.been.calledOnceWith(
       dppMock.getContract().getId(),
       'domain',
       {
@@ -35,21 +40,18 @@ describe('resolveMethodFactory', () => {
         ],
       },
     );
-    expect(result).to.deep.include(parentDocument);
   });
 
   it('should throw an error if no documents found', async () => {
-    const resolveByRecord = resolveMethodFactory(dapiClientMock, dppMock);
-    let error;
-
     dapiClientMock.fetchDocuments.resolves([]);
 
     try {
-      await resolveByRecord('name');
-    } catch (e) {
-      error = e;
-    }
+      await resolveMethod('name');
 
-    expect(error).to.be.an.instanceOf(Error);
+      expect.fail('Error has not been thrown');
+    } catch (e) {
+      expect(e).to.be.an.instanceOf(Error);
+      expect(e.message).to.equal('Domain \'name\' was not found');
+    }
   });
 });
