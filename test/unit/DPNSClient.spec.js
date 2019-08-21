@@ -10,6 +10,7 @@ describe('DPNSClient', () => {
   let parentDocument;
   let walletMock;
   let DPNSClient;
+  let bUser;
 
   let registerMethodMock;
   let resolveMethodMock;
@@ -44,13 +45,15 @@ describe('DPNSClient', () => {
       '../../lib/method/searchMethodFactory': this.sinon.stub().returns(searchMethodMock),
     });
 
-    dpnsClient = new DPNSClient(dapiClientMock, walletMock);
+    bUser = {};
+
+    dpnsClient = new DPNSClient(dapiClientMock, walletMock, bUser);
   });
 
   describe('#register', () => {
     it('should throw an error if `name` is not specified', async () => {
       try {
-        await dpnsClient.register('', '562a795654476351646e34744d576866637979455673317a7476744b3676797a');
+        await dpnsClient.register('');
 
         expect.fail('Error has not been thrown');
       } catch (e) {
@@ -60,7 +63,7 @@ describe('DPNSClient', () => {
     });
 
     it('should return a document', async () => {
-      const result = await dpnsClient.register('name', '562a795654476351646e34744d576866637979455673317a7476744b3676797a');
+      const result = await dpnsClient.register('name');
 
       expect(result).to.be.an.instanceOf(Document);
       expect(result).to.equal(parentDocument);
