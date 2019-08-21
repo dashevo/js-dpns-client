@@ -1,5 +1,5 @@
 {
-  "name": "dpns-client",
+  "name": "@dashevo/dpns-client",
   "version": "0.1.0",
   "description": "Javascript client for DPNS dApp",
   "main": "lib/DPNSClient.js",
