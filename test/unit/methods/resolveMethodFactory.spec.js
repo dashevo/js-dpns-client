@@ -1,8 +1,9 @@
 const Document = require('@dashevo/dpp/lib/document/Document');
+const createDPPMock = require('@dashevo/dpp/lib/test/mocks/createDPPMock');
+
 const createDataProviderMock = require('../../../lib/test/mocks/createDapiClientMock');
 const dpnsDocumentFixture = require('../../../lib/test/fixtures/getDpnsDocumentFixture');
 const resolveMethodFactory = require('../../../lib/method/resolveMethodFactory');
-const createDPPMock = require('../../../lib/test/mocks/createDPPMock');
 const { hash } = require('../../../lib/utils/doubleSha256Multihash');
 
 describe('resolveMethodFactory', () => {

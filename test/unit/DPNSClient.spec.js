@@ -1,5 +1,6 @@
-const rewiremock = require('rewiremock/node');
 const Document = require('@dashevo/dpp/lib/document/Document');
+
+const DPNSClient = require('../../lib/DPNSClient');
 const createDapiClientMock = require('../../lib/test/mocks/createDapiClientMock');
 const dpnsDocumentFixture = require('../../lib/test/fixtures/getDpnsDocumentFixture');
 const createWalletMock = require('../../lib/test/mocks/createWalletMock');
@@ -9,14 +10,7 @@ describe('DPNSClient', () => {
   let dapiClientMock;
   let parentDocument;
   let walletMock;
-  let DPNSClient;
-  let bUser;
-
-  let registerMethodMock;
-  let resolveMethodMock;
-  let resolveByRecordMethodMock;
-  let searchMethodMock;
-
+  let blockchainIdentity;
   let dpnsClient;
 
   beforeEach(function beforeEach() {
@@ -33,21 +27,13 @@ describe('DPNSClient', () => {
       getPrivateKeys: this.sinon.stub().returns(['privateKey']),
     });
 
-    registerMethodMock = this.sinon.stub().resolves(parentDocument);
-    resolveMethodMock = this.sinon.stub().resolves(parentDocument);
-    resolveByRecordMethodMock = this.sinon.stub().resolves(parentDocument);
-    searchMethodMock = this.sinon.stub().resolves([parentDocument]);
+    blockchainIdentity = {};
 
-    DPNSClient = rewiremock.proxy('../../lib/DPNSClient', {
-      '../../lib/method/registerMethodFactory': this.sinon.stub().returns(registerMethodMock),
-      '../../lib/method/resolveMethodFactory': this.sinon.stub().returns(resolveMethodMock),
-      '../../lib/method/resolveByRecordMethodFactory': this.sinon.stub().returns(resolveByRecordMethodMock),
-      '../../lib/method/searchMethodFactory': this.sinon.stub().returns(searchMethodMock),
-    });
-
-    bUser = {};
-
-    dpnsClient = new DPNSClient(dapiClientMock, walletMock, bUser);
+    dpnsClient = new DPNSClient(dapiClientMock, walletMock, blockchainIdentity);
+    dpnsClient.registerMethod = this.sinon.stub().resolves(parentDocument);
+    dpnsClient.resolveMethod = this.sinon.stub().resolves(parentDocument);
+    dpnsClient.resolveByRecordMethod = this.sinon.stub().resolves(parentDocument);
+    dpnsClient.searchMethod = this.sinon.stub().resolves([parentDocument]);
   });
 
   describe('#register', () => {

@@ -1,8 +1,9 @@
 const Document = require('@dashevo/dpp/lib/document/Document');
+const createDPPMock = require('@dashevo/dpp/lib/test/mocks/createDPPMock');
+
 const createDapiClientMock = require('../../../lib/test/mocks/createDapiClientMock');
 const dpnsDocumentFixture = require('../../../lib/test/fixtures/getDpnsDocumentFixture');
 const resolveByRecordMethodFactory = require('../../../lib/method/resolveByRecordMethodFactory');
-const createDPPMock = require('../../../lib/test/mocks/createDPPMock');
 
 describe('resolveByRecordMethodFactory', () => {
   let dapiClientMock;

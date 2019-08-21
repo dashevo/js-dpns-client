@@ -1,11 +1,11 @@
-const rewiremock = require('rewiremock/node');
-
 const Document = require('@dashevo/dpp/lib/document/Document');
+const createDPPMock = require('@dashevo/dpp/lib/test/mocks/createDPPMock');
+const { PrivateKey } = require('@dashevo/dashcore-lib');
 
+const registerMethodFactory = require('../../../lib/method/registerMethodFactory');
 const dpnsDocumentFixture = require('../../../lib/test/fixtures/getDpnsDocumentFixture');
 const createDapiClientMock = require('../../../lib/test/mocks/createDapiClientMock');
 const createWalletMock = require('../../../lib/test/mocks/createWalletMock');
-const createDPPMock = require('../../../lib/test/mocks/createDPPMock');
 const { getParentDocumentFixture } = require('../../../lib/test/fixtures/getDpnsDocumentFixture');
 const { hash } = require('../../../lib/utils/doubleSha256Multihash');
 
@@ -15,9 +15,8 @@ describe('registerMethodFactory', () => {
   let parentDocument;
   let preorderDocument;
   let walletMock;
-  let createDocumentTransactionDataMock;
   let registerMethod;
-  let bUser;
+  let blockchainIdentity;
   let privateKey;
   let prevSTHash;
   let preorderTransitionHash;
@@ -28,9 +27,9 @@ describe('registerMethodFactory', () => {
     parentDocument = dpnsDocumentFixture.getParentDocumentFixture({ type: 'domain' });
     preorderDocument = getParentDocumentFixture({ type: 'preorder' });
 
-    privateKey = 'privateKey';
-    prevSTHash = 'prevSTHash';
-    preorderTransitionHash = 'preorderTransitionHash';
+    privateKey = new PrivateKey();
+    prevSTHash = 'ac5784e7dd8fc9f1b638a353fb10015d3841bb9076c20e2ebefc3e97599e92b5';
+    preorderTransitionHash = 'ac5784e7dd8fc9f1b638a353fb10015d3841bb9076c20e2ebefc3e97599e92b5';
 
     dapiClientMock.fetchDocuments.resolves([parentDocument.toJSON()]);
     dapiClientMock.getLastUserStateTransitionHash.resolves(prevSTHash);
@@ -50,49 +49,25 @@ describe('registerMethodFactory', () => {
     dppMock.packet.validate.returns({
       isValid: this.sinon.stub().returns(true),
     });
+    dppMock.packet.create.returns({
+      hash: this.sinon.stub().returns('ac5784e7dd8fc9f1b638a353fb10015d3841bb9076c20e2ebefc3e97599e92b5'),
+      serialize: this.sinon.stub().returns('ac5784e7dd8fc9f1b638a353fb10015d3841bb9076c20e2ebefc3e97599e92b5'),
+    });
 
     dppMock.document.create.withArgs('preorder').returns(preorderDocument);
     dppMock.document.create.withArgs('domain').returns(parentDocument);
 
-    const serialize = this.sinon.stub().returns('');
-
-    createDocumentTransactionDataMock = this.sinon.stub().resolves({
-      transaction: { serialize },
-      stPacket: { serialize },
-    });
-
-    const registerMethodFactory = rewiremock.proxy('../../../lib/method/registerMethodFactory', {
-      '../../../lib/transaction/createDocumentTransactionData': createDocumentTransactionDataMock,
-    });
-
-    bUser = {
-      regTxId: 'someRegTxId',
+    blockchainIdentity = {
+      regTxId: 'ac5784e7dd8fc9f1b638a353fb10015d3841bb9076c20e2ebefc3e97599e92b5',
     };
 
-    registerMethod = registerMethodFactory(dapiClientMock, dppMock, walletMock, bUser);
+    registerMethod = registerMethodFactory(dapiClientMock, dppMock, walletMock, blockchainIdentity);
   });
 
   it('should return a document', async () => {
     const name = 'someName';
     const result = await registerMethod(name);
     const nameHash = hash(Buffer.from(name)).toString('hex');
-
-    expect(createDocumentTransactionDataMock).to.have.been.calledTwice();
-    expect(createDocumentTransactionDataMock.getCall(0)).to.have.been.calledWith(
-      preorderDocument,
-      bUser.regTxId,
-      privateKey,
-      dppMock,
-      prevSTHash,
-    );
-
-    expect(createDocumentTransactionDataMock.getCall(1)).to.have.been.calledWith(
-      preorderDocument,
-      bUser.regTxId,
-      privateKey,
-      dppMock,
-      preorderTransitionHash,
-    );
 
     expect(dapiClientMock.fetchDocuments).to.have.been.calledTwice();
     expect(dapiClientMock.fetchDocuments.getCall(0)).to.have.been.calledWith(
