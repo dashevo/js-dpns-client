@@ -2,10 +2,11 @@ const rewiremock = require('rewiremock/node');
 
 const Document = require('@dashevo/dpp/lib/document/Document');
 
-const dpnsDocumentFixture = require('../../fixtures/getDpnsDocumentFixture');
-const createDapiClientMock = require('../../mocks/createDapiClientMock');
-const createWalletMock = require('../../mocks/createWalletMock');
-const createDPPMock = require('../../mocks/createDPPMock');
+const dpnsDocumentFixture = require('../../../lib/test/fixtures/getDpnsDocumentFixture');
+const createDapiClientMock = require('../../../lib/test/mocks/createDapiClientMock');
+const createWalletMock = require('../../../lib/test/mocks/createWalletMock');
+const createDPPMock = require('../../../lib/test/mocks/createDPPMock');
+const { getParentDocumentFixture } = require('../../../lib/test/fixtures/getDpnsDocumentFixture');
 
 describe('registerMethodFactory', () => {
   let dapiClientMock;
@@ -18,7 +19,7 @@ describe('registerMethodFactory', () => {
   beforeEach(function beforeEach() {
     dapiClientMock = createDapiClientMock(this.sinon);
 
-    parentDocument = dpnsDocumentFixture.getParentDocumentFixture();
+    parentDocument = dpnsDocumentFixture.getParentDocumentFixture({ type: 'domain' });
 
     dapiClientMock.fetchDocuments.resolves([parentDocument.toJSON()]);
 
@@ -33,27 +34,31 @@ describe('registerMethodFactory', () => {
       getId: this.sinon.stub(),
     });
 
-    const serialize = this.sinon.stub();
+    dppMock.packet.validate.returns({
+      isValid: this.sinon.stub().returns(true),
+    });
+
+    dppMock.document.create.withArgs('preorder').returns(getParentDocumentFixture({ type: 'preorder' }));
+    dppMock.document.create.withArgs('domain').returns(parentDocument);
+
+    const serialize = this.sinon.stub().returns('');
 
     createDocumentTransactionDataMock = this.sinon.stub().resolves({
       transaction: { serialize },
       stPacket: { serialize },
     });
 
-    const registerMehtodFactory = rewiremock.proxy('../../../lib/method/registerMethodFactory', {
+    const registerMethodFactory = rewiremock.proxy('../../../lib/method/registerMethodFactory', {
       '../../../lib/transaction/createDocumentTransactionData': createDocumentTransactionDataMock,
     });
 
-    registerMethod = registerMehtodFactory(dapiClientMock, dppMock, walletMock);
-  });
-
-  it('should return function', () => {
-    expect(registerMethod).to.be.instanceOf(Function);
+    registerMethod = registerMethodFactory(dapiClientMock, dppMock, walletMock);
   });
 
   it('should return a document', async () => {
     const result = await registerMethod('someName', '562a795654476351646e34744d576866637979455673317a7476744b3676797a');
+
     expect(result).to.be.an.instanceOf(Document);
-    expect(dapiClientMock.fetchDocuments).to.be.calledOnce();
+    expect(result).to.be.equal(parentDocument);
   });
 });

@@ -1,8 +1,8 @@
 const Document = require('@dashevo/dpp/lib/document/Document');
-const createDataProviderMock = require('../../mocks/createDapiClientMock');
-const dpnsDocumentFixture = require('../../fixtures/getDpnsDocumentFixture');
+const createDataProviderMock = require('../../../lib/test/mocks/createDapiClientMock');
+const dpnsDocumentFixture = require('../../../lib/test/fixtures/getDpnsDocumentFixture');
 const searchMethodFactory = require('../../../lib/method/searchMethodFactory');
-const createDPPMock = require('../../mocks/createDPPMock');
+const createDPPMock = require('../../../lib/test/mocks/createDPPMock');
 
 describe('searchMethodFactory', () => {
   let dapiClientMock;
@@ -19,19 +19,14 @@ describe('searchMethodFactory', () => {
     });
   });
 
-  it('should return function', () => {
-    const searchMethod = searchMethodFactory(dapiClientMock, dppMock);
-
-    expect(searchMethod).to.be.instanceOf(Function);
-  });
-
   it('should return array of documents', async () => {
     const searchMethod = searchMethodFactory(dapiClientMock, dppMock);
     const result = await searchMethod('labelPrefix', 'parentDomainName');
 
     expect(result).to.be.an.instanceOf(Array);
-    expect(result.length).to.be.equal(1);
+    expect(result).to.have.lengthOf(1);
     expect(result[0]).to.be.instanceOf(Document);
+    expect(result[0]).to.deep.include(parentDocument);
     expect(dapiClientMock.fetchDocuments).to.be.calledOnceWith(
       dppMock.getContract().getId(),
       'domain',
