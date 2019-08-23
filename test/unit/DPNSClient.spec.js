@@ -1,24 +1,17 @@
 const Document = require('@dashevo/dpp/lib/document/Document');
 
 const DPNSClient = require('../../lib/DPNSClient');
-const createDapiClientMock = require('../../lib/test/mocks/createDapiClientMock');
 const dpnsDocumentFixture = require('../../lib/test/fixtures/getDpnsDocumentFixture');
 const InvalidArgumentError = require('../../lib/errors/InvalidArgumentError');
 
 describe('DPNSClient', () => {
-  let dapiClientMock;
   let parentDocument;
   let dpnsClient;
 
   beforeEach(function beforeEach() {
-    dapiClientMock = createDapiClientMock(this.sinon);
-
     parentDocument = dpnsDocumentFixture.getParentDocumentFixture();
 
-    dapiClientMock.fetchDocuments.resolves([parentDocument.toJSON()]);
-    dapiClientMock.getLastUserStateTransitionHash.resolves('562a795654476351646e34744d576866637979455673317a7476744b3676797a');
-
-    dpnsClient = new DPNSClient(dapiClientMock, null, null);
+    dpnsClient = new DPNSClient(null, null, null);
     dpnsClient.registerMethod = this.sinon.stub().resolves(parentDocument);
     dpnsClient.resolveMethod = this.sinon.stub().resolves(parentDocument);
     dpnsClient.resolveByRecordMethod = this.sinon.stub().resolves(parentDocument);
