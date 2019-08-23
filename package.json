@@ -47,7 +47,7 @@
     "@dashevo/dapi-client": "^0.6.5",
     "@dashevo/dashcore-lib": "^0.17.9",
     "@dashevo/dpns-contract": "^0.1.0",
-    "@dashevo/dpp": "^0.7.2",
+    "@dashevo/dpp": "^0.8.0-dev.3",
     "multihashes": "^0.4.15"
   }
 }
