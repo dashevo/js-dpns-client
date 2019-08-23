@@ -1,5 +1,6 @@
 const Document = require('@dashevo/dpp/lib/document/Document');
 const createDPPMock = require('@dashevo/dpp/lib/test/mocks/createDPPMock');
+const { hash } = require('@dashevo/dpp/lib/util/multihashDoubleSHA256');
 const { PrivateKey } = require('@dashevo/dashcore-lib');
 
 const registerMethodFactory = require('../../../lib/method/registerMethodFactory');
@@ -7,7 +8,6 @@ const dpnsDocumentFixture = require('../../../lib/test/fixtures/getDpnsDocumentF
 const createDapiClientMock = require('../../../lib/test/mocks/createDapiClientMock');
 const createWalletMock = require('../../../lib/test/mocks/createWalletMock');
 const { getParentDocumentFixture } = require('../../../lib/test/fixtures/getDpnsDocumentFixture');
-const { hash } = require('../../../lib/utils/doubleSha256Multihash');
 
 describe('registerMethodFactory', () => {
   let dapiClientMock;
