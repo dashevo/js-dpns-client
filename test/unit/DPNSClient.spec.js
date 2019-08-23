@@ -3,14 +3,11 @@ const Document = require('@dashevo/dpp/lib/document/Document');
 const DPNSClient = require('../../lib/DPNSClient');
 const createDapiClientMock = require('../../lib/test/mocks/createDapiClientMock');
 const dpnsDocumentFixture = require('../../lib/test/fixtures/getDpnsDocumentFixture');
-const createWalletMock = require('../../lib/test/mocks/createWalletMock');
 const InvalidArgumentError = require('../../lib/errors/InvalidArgumentError');
 
 describe('DPNSClient', () => {
   let dapiClientMock;
   let parentDocument;
-  let walletMock;
-  let blockchainIdentity;
   let dpnsClient;
 
   beforeEach(function beforeEach() {
@@ -21,15 +18,7 @@ describe('DPNSClient', () => {
     dapiClientMock.fetchDocuments.resolves([parentDocument.toJSON()]);
     dapiClientMock.getLastUserStateTransitionHash.resolves('562a795654476351646e34744d576866637979455673317a7476744b3676797a');
 
-    walletMock = createWalletMock(this.sinon);
-    walletMock.getAccount.returns({
-      getAddress: this.sinon.stub().returns({ address: 'address' }),
-      getPrivateKeys: this.sinon.stub().returns(['privateKey']),
-    });
-
-    blockchainIdentity = {};
-
-    dpnsClient = new DPNSClient(dapiClientMock, walletMock, blockchainIdentity);
+    dpnsClient = new DPNSClient(dapiClientMock, null, null);
     dpnsClient.registerMethod = this.sinon.stub().resolves(parentDocument);
     dpnsClient.resolveMethod = this.sinon.stub().resolves(parentDocument);
     dpnsClient.resolveByRecordMethod = this.sinon.stub().resolves(parentDocument);
