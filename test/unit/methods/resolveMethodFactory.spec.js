@@ -15,11 +15,12 @@ describe('resolveMethodFactory', () => {
   beforeEach(function beforeEach() {
     dapiClientMock = createDataProviderMock(this.sinon);
     parentDocument = dpnsDocumentFixture.getParentDocumentFixture();
-    dapiClientMock.fetchDocuments.resolves([parentDocument.toJSON()]);
+    dapiClientMock.fetchDocuments
+      .resolves([parentDocument.toJSON()]);
 
     dppMock = createDPPMock(this.sinon);
     dppMock.getContract.returns({
-      getId: this.sinon.stub(),
+      getId: () => 'someContractId',
     });
 
     resolveMethod = resolveMethodFactory(dapiClientMock, dppMock);

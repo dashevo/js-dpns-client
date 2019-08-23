@@ -31,31 +31,39 @@ describe('registerMethodFactory', () => {
     prevSTHash = 'ac5784e7dd8fc9f1b638a353fb10015d3841bb9076c20e2ebefc3e97599e92b5';
     preorderTransitionHash = 'ac5784e7dd8fc9f1b638a353fb10015d3841bb9076c20e2ebefc3e97599e92b5';
 
-    dapiClientMock.fetchDocuments.resolves([parentDocument.toJSON()]);
-    dapiClientMock.getLastUserStateTransitionHash.resolves(prevSTHash);
-    dapiClientMock.sendRawTransition.resolves(preorderTransitionHash);
+    dapiClientMock.fetchDocuments
+      .resolves([parentDocument.toJSON()]);
+    dapiClientMock.getLastUserStateTransitionHash
+      .resolves(prevSTHash);
+    dapiClientMock.sendRawTransition
+      .resolves(preorderTransitionHash);
 
     walletMock = createWalletMock(this.sinon);
     walletMock.getAccount.returns({
-      getAddress: this.sinon.stub().returns({ address: 'address' }),
-      getPrivateKeys: this.sinon.stub().returns([privateKey]),
+      getAddress: () => ({ address: 'address' }),
+      getPrivateKeys: () => [privateKey],
     });
 
     dppMock = createDPPMock(this.sinon);
     dppMock.getContract.returns({
-      getId: this.sinon.stub(),
+      getId: () => 'someContratId',
     });
 
     dppMock.packet.validate.returns({
-      isValid: this.sinon.stub().returns(true),
-    });
-    dppMock.packet.create.returns({
-      hash: this.sinon.stub().returns('ac5784e7dd8fc9f1b638a353fb10015d3841bb9076c20e2ebefc3e97599e92b5'),
-      serialize: this.sinon.stub().returns('ac5784e7dd8fc9f1b638a353fb10015d3841bb9076c20e2ebefc3e97599e92b5'),
+      isValid: () => true,
     });
 
-    dppMock.document.create.withArgs('preorder').returns(preorderDocument);
-    dppMock.document.create.withArgs('domain').returns(parentDocument);
+    dppMock.packet.create.returns({
+      hash: () => 'ac5784e7dd8fc9f1b638a353fb10015d3841bb9076c20e2ebefc3e97599e92b5',
+      serialize: () => 'ac5784e7dd8fc9f1b638a353fb10015d3841bb9076c20e2ebefc3e97599e92b5',
+    });
+
+    dppMock.document.create
+      .withArgs('preorder', this.sinon.match.any)
+      .returns(preorderDocument);
+    dppMock.document.create
+      .withArgs('domain', this.sinon.match.any)
+      .returns(parentDocument);
 
     blockchainIdentity = {
       regTxId: 'ac5784e7dd8fc9f1b638a353fb10015d3841bb9076c20e2ebefc3e97599e92b5',

@@ -9,19 +9,23 @@ describe('searchMethodFactory', () => {
   let dapiClientMock;
   let dppMock;
   let parentDocument;
+  let searchMethod;
 
   beforeEach(function beforeEach() {
     dapiClientMock = createDataProviderMock(this.sinon);
     parentDocument = dpnsDocumentFixture.getParentDocumentFixture();
-    dapiClientMock.fetchDocuments.resolves([parentDocument.toJSON()]);
+    dapiClientMock.fetchDocuments
+      .resolves([parentDocument.toJSON()]);
+
     dppMock = createDPPMock(this.sinon);
     dppMock.getContract.returns({
-      getId: this.sinon.stub(),
+      getId: () => 'someContractId',
     });
+
+    searchMethod = searchMethodFactory(dapiClientMock, dppMock);
   });
 
   it('should return array of documents', async () => {
-    const searchMethod = searchMethodFactory(dapiClientMock, dppMock);
     const result = await searchMethod('labelPrefix', 'parentDomainName');
 
     expect(result).to.be.an('array');
