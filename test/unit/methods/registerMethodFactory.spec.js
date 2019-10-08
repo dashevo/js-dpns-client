@@ -40,8 +40,7 @@ describe('registerMethodFactory', () => {
 
     walletMock = createWalletMock(this.sinon);
     walletMock.getAccount.returns({
-      getAddress: () => ({ address: 'address' }),
-      getPrivateKeys: () => [privateKey],
+      getIdentityPrivateKey: () => privateKey,
     });
 
     dppMock = createDPPMock(this.sinon);
