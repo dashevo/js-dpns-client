@@ -24,9 +24,6 @@
     "dpns",
     "client"
   ],
-  "authors": [
-    "Djavid Gabibiyan"
-  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/dashevo/js-dpns-client/issues"
