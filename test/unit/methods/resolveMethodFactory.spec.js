@@ -3,27 +3,30 @@ const createDPPMock = require('@dashevo/dpp/lib/test/mocks/createDPPMock');
 const { hash } = require('@dashevo/dpp/lib/util/multihashDoubleSHA256');
 
 const createDataProviderMock = require('../../../lib/test/mocks/createDapiClientMock');
-const dpnsDocumentFixture = require('../../../lib/test/fixtures/getDpnsDocumentFixture');
+
+const getDpnsDocumentFixture = require('../../../lib/test/fixtures/getDpnsDocumentFixture');
+const getDpnsContractFixture = require('../../../lib/test/fixtures/getDpnsContractFixture');
+
 const resolveMethodFactory = require('../../../lib/method/resolveMethodFactory');
 
 describe('resolveMethodFactory', () => {
   let dapiClientMock;
   let dppMock;
   let parentDocument;
+  let dataContract;
   let resolveMethod;
 
   beforeEach(function beforeEach() {
     dapiClientMock = createDataProviderMock(this.sinon);
-    parentDocument = dpnsDocumentFixture.getParentDocumentFixture();
+    parentDocument = getDpnsDocumentFixture.getParentDocumentFixture();
+    dataContract = getDpnsContractFixture();
     dapiClientMock.fetchDocuments
       .resolves([parentDocument.toJSON()]);
 
     dppMock = createDPPMock(this.sinon);
-    dppMock.getContract.returns({
-      getId: () => 'someContractId',
-    });
+    dppMock.document.createFromObject.returns(parentDocument);
 
-    resolveMethod = resolveMethodFactory(dapiClientMock, dppMock);
+    resolveMethod = resolveMethodFactory(dapiClientMock, dppMock, dataContract);
   });
 
   it('should return a document', async () => {
@@ -34,13 +37,17 @@ describe('resolveMethodFactory', () => {
     expect(result).to.deep.equal(parentDocument);
 
     expect(dapiClientMock.fetchDocuments).to.have.been.calledOnceWith(
-      dppMock.getContract().getId(),
+      dataContract.getId(),
       'domain',
       {
         where: [
           ['nameHash', '==', hash(Buffer.from(name.toLowerCase())).toString('hex')],
         ],
       },
+    );
+
+    expect(dppMock.document.createFromObject).to.have.been.calledOnceWithExactly(
+      parentDocument.toJSON(),
     );
   });
 

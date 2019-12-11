@@ -2,27 +2,30 @@ const Document = require('@dashevo/dpp/lib/document/Document');
 const createDPPMock = require('@dashevo/dpp/lib/test/mocks/createDPPMock');
 
 const createDapiClientMock = require('../../../lib/test/mocks/createDapiClientMock');
-const dpnsDocumentFixture = require('../../../lib/test/fixtures/getDpnsDocumentFixture');
+
+const getDpnsDocumentFixture = require('../../../lib/test/fixtures/getDpnsDocumentFixture');
+const getDpnsContractFixture = require('../../../lib/test/fixtures/getDpnsContractFixture');
+
 const resolveByRecordMethodFactory = require('../../../lib/method/resolveByRecordMethodFactory');
 
 describe('resolveByRecordMethodFactory', () => {
   let dapiClientMock;
   let dppMock;
   let parentDocument;
+  let dataContract;
   let resolveByRecordMethod;
 
   beforeEach(function beforeEach() {
     dapiClientMock = createDapiClientMock(this.sinon);
-    parentDocument = dpnsDocumentFixture.getParentDocumentFixture();
+    parentDocument = getDpnsDocumentFixture.getParentDocumentFixture();
+    dataContract = getDpnsContractFixture();
     dapiClientMock.fetchDocuments
       .resolves([parentDocument.toJSON()]);
 
     dppMock = createDPPMock(this.sinon);
-    dppMock.getContract.returns({
-      getId: () => 'someContractId',
-    });
+    dppMock.document.createFromObject.returns(parentDocument);
 
-    resolveByRecordMethod = resolveByRecordMethodFactory(dapiClientMock, dppMock);
+    resolveByRecordMethod = resolveByRecordMethodFactory(dapiClientMock, dppMock, dataContract);
   });
 
   it('should return a document', async () => {
@@ -32,13 +35,17 @@ describe('resolveByRecordMethodFactory', () => {
     expect(result).to.deep.equal(parentDocument);
 
     expect(dapiClientMock.fetchDocuments).to.have.been.calledOnceWith(
-      dppMock.getContract().getId(),
+      dataContract.getId(),
       'domain',
       {
         where: [
           ['record.name', '==', 'value'],
         ],
       },
+    );
+
+    expect(dppMock.document.createFromObject).to.have.been.calledOnceWithExactly(
+      parentDocument.toJSON(),
     );
   });
 
