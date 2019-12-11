@@ -29,7 +29,6 @@ describe('searchMethodFactory', () => {
   });
 
   it('should return array of documents', async () => {
-
     const result = await searchMethod('labelPrefix', 'parentDomainName');
 
     expect(result).to.be.an('array');

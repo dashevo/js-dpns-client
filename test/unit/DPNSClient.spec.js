@@ -42,7 +42,7 @@ describe('DPNSClient', () => {
       '../../lib/method/registerMethodFactory': registerMethodFactoryMock,
       '../../lib/method/resolveMethodFactory': resolveMethodFactoryMock,
       '../../lib/method/resolveByRecordMethodFactory': resolveByRecordMethodFactoryMock,
-      '../../lib/method/searchdMethodFactoryM': searchMethodFactoryMock,
+      '../../lib/method/searchMethodFactory': searchMethodFactoryMock,
     });
   });
 
