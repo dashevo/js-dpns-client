@@ -46,7 +46,7 @@ afterEach(function afterEach() {
 });
 
 const dotenvConfig = dotenvSafe.config({
-  path: path.resolve(__dirname, '..', '..', '.env'),
+  path: path.resolve(__dirname, '..', '.env'),
 });
 dotenvExpand(dotenvConfig);
 
