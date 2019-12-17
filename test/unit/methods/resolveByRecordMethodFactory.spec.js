@@ -39,13 +39,14 @@ describe('resolveByRecordMethodFactory', () => {
       'domain',
       {
         where: [
-          ['record.name', '==', 'value'],
+          ['records.name', '==', 'value'],
         ],
       },
     );
 
     expect(dppMock.document.createFromObject).to.have.been.calledOnceWithExactly(
       parentDocument.toJSON(),
+      { skipValidation: true },
     );
   });
 

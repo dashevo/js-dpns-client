@@ -56,7 +56,7 @@ describe('DPNSClient', () => {
       const dpnsClient = new DPNSClient(dapiClient, wallet, identity);
 
       expect(registerMethodFactoryMock).to.have.been.calledOnceWithExactly(
-        dapiClient, dppMock, wallet, identity, dataContract,
+        dapiClient, dppMock, wallet, dataContract,
       );
 
       expect(resolveMethodFactoryMock).to.have.been.calledOnceWithExactly(

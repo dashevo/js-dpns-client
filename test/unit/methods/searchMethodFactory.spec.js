@@ -43,13 +43,14 @@ describe('searchMethodFactory', () => {
       {
         where: [
           ['normalizedParentDomainName', '==', 'parentDomainName'.toLowerCase()],
-          ['normalizedLabel', 'startWith', 'labelPrefix'],
+          ['normalizedLabel', 'startsWith', 'labelPrefix'],
         ],
       },
     );
 
     expect(dppMock.document.createFromObject).to.have.been.calledOnceWithExactly(
       parentDocument.toJSON(),
+      { skipValidation: true },
     );
   });
 });

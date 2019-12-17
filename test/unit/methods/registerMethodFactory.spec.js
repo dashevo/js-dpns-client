@@ -100,31 +100,76 @@ describe('registerMethodFactory', () => {
       dapiClientMock,
       dppMock,
       walletMock,
-      identity,
       dataContract,
     );
   });
 
   it('should return a document', async () => {
     const name = 'someName';
-    const result = await registerMethod(name);
+    const result = await registerMethod(name, identity, {
+      dashIdentity: identity.getId(),
+    });
     const nameHash = hash(Buffer.from(name)).toString('hex');
 
     const saltedDomainHash = '56147072656f7264657253616c74736f6d654e616d65';
 
-    expect(dapiClientMock.fetchDocuments).to.have.been.calledTwice();
-    expect(dapiClientMock.fetchDocuments.getCall(0)).to.have.been.calledWith(
-      dataContract.getId(),
-      'preorder',
-      { where: [['saltedDomainHash', '==', saltedDomainHash]] },
-    );
-    expect(dapiClientMock.fetchDocuments.getCall(1)).to.have.been.calledWith(
-      dataContract.getId(),
-      'domain',
-      { where: [['nameHash', '==', nameHash]] },
-    );
+    expect(dppMock.document.create.getCall(0).args).to.deep.equal([
+      dataContract,
+      identity.getId(),
+      'preorder', {
+        saltedDomainHash,
+      },
+    ]);
+
+    expect(dppMock.document.create.getCall(1).args).to.deep.equal([
+      dataContract,
+      identity.getId(),
+      'domain', {
+        nameHash,
+        label: name,
+        normalizedLabel: name.toLowerCase(),
+        normalizedParentDomainName: '',
+        preorderSalt: 'preorderSalt',
+        records: {
+          dashIdentity: identity.getId(),
+        },
+      },
+    ]);
 
     expect(result).to.be.an.instanceOf(Document);
     expect(result).to.be.equal(parentDocument);
+  });
+
+  it('should throw an error if name is missing', async () => {
+    try {
+      await registerMethod();
+
+      expect.fail('Error has not been thrown');
+    } catch (e) {
+      expect(e).to.be.an.instanceOf(Error);
+      expect(e.message).to.equal('Invalid argument: name');
+    }
+  });
+
+  it('should throw an error if user is missing', async () => {
+    try {
+      await registerMethod('name');
+
+      expect.fail('Error has not been thrown');
+    } catch (e) {
+      expect(e).to.be.an.instanceOf(Error);
+      expect(e.message).to.equal('Invalid argument: user');
+    }
+  });
+
+  it('should throw an error if records is missing', async () => {
+    try {
+      await registerMethod('name', identity);
+
+      expect.fail('Error has not been thrown');
+    } catch (e) {
+      expect(e).to.be.an.instanceOf(Error);
+      expect(e.message).to.equal('Invalid argument: records');
+    }
   });
 });

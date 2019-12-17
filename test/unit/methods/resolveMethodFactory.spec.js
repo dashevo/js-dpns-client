@@ -48,6 +48,7 @@ describe('resolveMethodFactory', () => {
 
     expect(dppMock.document.createFromObject).to.have.been.calledOnceWithExactly(
       parentDocument.toJSON(),
+      { skipValidation: true },
     );
   });
 
