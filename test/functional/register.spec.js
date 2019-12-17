@@ -15,6 +15,8 @@ const dpnsDocuments = require('@dashevo/dpns-contract/src/schema/dpns-documents'
 
 const DPNSClient = require('../../lib/DPNSClient');
 
+const DPNSTestDataProvider = require('../../lib/test/DPNSTestDataProvider');
+
 const wait = require('../../lib/utils/wait');
 
 async function registerIdentity(dpp, dashCoreApi, dapiClient) {
@@ -111,37 +113,13 @@ describe('register', function main() {
     // activate everything
     await dashCoreApi.generate(500);
 
-    const otherDPP = new DashPlatformProtocol();
+    const validationlessDPP = new DashPlatformProtocol();
 
     dpp = new DashPlatformProtocol({
-      dataProvider: {
-        fetchIdentity: async (id) => {
-          const data = Buffer.from(id).toString('hex');
-
-          const {
-            result: {
-              response: {
-                value: serializedIdentity,
-              },
-            },
-          } = await tendermintRPCClient.request(
-            'abci_query',
-            {
-              path: '/identity',
-              data,
-            },
-          );
-
-          if (!serializedIdentity) {
-            return null;
-          }
-
-          return otherDPP.identity.createFromSerialized(
-            Buffer.from(serializedIdentity, 'base64'),
-            { skipValidation: true },
-          );
-        },
-      },
+      dataProvider: new DPNSTestDataProvider(
+        validationlessDPP,
+        tendermintRPCClient,
+      ),
     });
 
     const {
