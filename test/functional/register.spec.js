@@ -93,7 +93,7 @@ describe('register', function main() {
   let dapiClient;
   let dpp;
   let walletMock;
-  let userIdentity;
+  let userIdentityMock;
 
   beforeEach(async () => {
     dapiInstance = await startDapi();
@@ -170,21 +170,21 @@ describe('register', function main() {
       }),
     };
 
-    userIdentity = {
+    userIdentityMock = {
       getId: () => userIdentityId,
       getPublicKeyById: () => userPublicKey,
     };
   });
 
   it('should register a domain', async () => {
-    const dpnsClient = new DPNSClient(dapiClient, walletMock, userIdentity);
+    const dpnsClient = new DPNSClient(dapiClient, walletMock, userIdentityMock);
     await dpnsClient.register('user.wallet.dash');
 
     await dpnsClient.resolve('user.wallet.dash');
 
     await dpnsClient.search('us', 'wallet.dash');
 
-    await dpnsClient.resolveByRecord('dashIdentity', userIdentity.getId());
+    await dpnsClient.resolveByRecord('dashIdentity', userIdentityMock.getId());
   });
 
   afterEach(async () => {
