@@ -155,8 +155,10 @@ describe('register', function main() {
   });
 
   it('should register a domain', async () => {
-    const dpnsClient = new DPNSClient(dapiClient, walletMock, userIdentityMock);
-    await dpnsClient.register('user.wallet.dash');
+    const dpnsClient = new DPNSClient(dapiClient, walletMock);
+    await dpnsClient.register('user.wallet.dash', userIdentityMock, {
+      dashIdentity: userIdentityMock.getId(),
+    });
 
     await dpnsClient.resolve('user.wallet.dash');
 
