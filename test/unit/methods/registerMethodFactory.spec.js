@@ -1,5 +1,7 @@
 const rewiremock = require('rewiremock/node');
 
+const bs58 = require('bs58');
+
 const Document = require('@dashevo/dpp/lib/document/Document');
 const createDPPMock = require('@dashevo/dpp/lib/test/mocks/createDPPMock');
 const { hash } = require('@dashevo/dpp/lib/util/multihashDoubleSHA256');
@@ -34,9 +36,9 @@ describe('registerMethodFactory', () => {
 
     privateKey = new PrivateKey();
 
-    dapiClientMock.fetchDocuments
-      .resolves([parentDocument.toJSON()]);
-    dapiClientMock.updateState = this.sinon.stub();
+    dapiClientMock.getDocuments
+      .resolves([parentDocument.serialize()]);
+    dapiClientMock.applyStateTransition = this.sinon.stub();
 
     walletMock = createWalletMock(this.sinon);
     walletMock.getAccount.returns({
@@ -83,7 +85,9 @@ describe('registerMethodFactory', () => {
 
     dppMock.document.createFromObject.returns(parentDocument);
 
-    preorderSalt = 'preorderSalt';
+    preorderSalt = bs58.encode(
+      Buffer.from('preorderSalt'),
+    );
 
     const entropyMock = {
       generate: () => preorderSalt,
@@ -109,9 +113,11 @@ describe('registerMethodFactory', () => {
     const result = await registerMethod(name, identity, {
       dashIdentity: identity.getId(),
     });
-    const nameHash = hash(Buffer.from(name)).toString('hex');
+    const nameHash = hash(
+      Buffer.from(`${name.toLowerCase()}.`),
+    ).toString('hex');
 
-    const saltedDomainHash = '56147072656f7264657253616c74736f6d654e616d65';
+    const saltedDomainHash = '56177072656f7264657253616c745609736f6d656e616d652e';
 
     expect(dppMock.document.create.getCall(0).args).to.deep.equal([
       dataContract,
@@ -129,7 +135,7 @@ describe('registerMethodFactory', () => {
         label: name,
         normalizedLabel: name.toLowerCase(),
         normalizedParentDomainName: '',
-        preorderSalt: 'preorderSalt',
+        preorderSalt,
         records: {
           dashIdentity: identity.getId(),
         },

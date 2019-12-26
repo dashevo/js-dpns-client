@@ -17,11 +17,11 @@ describe('searchMethodFactory', () => {
   beforeEach(function beforeEach() {
     dapiClientMock = createDataProviderMock(this.sinon);
     parentDocument = dpnsDocumentFixture.getParentDocumentFixture();
-    dapiClientMock.fetchDocuments
-      .resolves([parentDocument.toJSON()]);
+    dapiClientMock.getDocuments
+      .resolves([parentDocument.serialize()]);
 
     dppMock = createDPPMock(this.sinon);
-    dppMock.document.createFromObject.returns(parentDocument);
+    dppMock.document.createFromSerialized.returns(parentDocument);
 
     dataContract = getDpnsContractFixture();
 
@@ -37,7 +37,7 @@ describe('searchMethodFactory', () => {
     expect(result[0]).to.be.instanceOf(Document);
     expect(result[0]).to.deep.include(parentDocument);
 
-    expect(dapiClientMock.fetchDocuments).to.have.been.calledOnceWithExactly(
+    expect(dapiClientMock.getDocuments).to.have.been.calledOnceWithExactly(
       dataContract.getId(),
       'domain',
       {
@@ -48,8 +48,8 @@ describe('searchMethodFactory', () => {
       },
     );
 
-    expect(dppMock.document.createFromObject).to.have.been.calledOnceWithExactly(
-      parentDocument.toJSON(),
+    expect(dppMock.document.createFromSerialized).to.have.been.calledOnceWithExactly(
+      parentDocument.serialize(),
       { skipValidation: true },
     );
   });

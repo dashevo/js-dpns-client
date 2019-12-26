@@ -19,11 +19,11 @@ describe('resolveByRecordMethodFactory', () => {
     dapiClientMock = createDapiClientMock(this.sinon);
     parentDocument = getDpnsDocumentFixture.getParentDocumentFixture();
     dataContract = getDpnsContractFixture();
-    dapiClientMock.fetchDocuments
-      .resolves([parentDocument.toJSON()]);
+    dapiClientMock.getDocuments
+      .resolves([parentDocument.serialize()]);
 
     dppMock = createDPPMock(this.sinon);
-    dppMock.document.createFromObject.returns(parentDocument);
+    dppMock.document.createFromSerialized.returns(parentDocument);
 
     resolveByRecordMethod = resolveByRecordMethodFactory(dapiClientMock, dppMock, dataContract);
   });
@@ -34,7 +34,7 @@ describe('resolveByRecordMethodFactory', () => {
     expect(result).to.be.an.instanceOf(Document);
     expect(result).to.deep.equal(parentDocument);
 
-    expect(dapiClientMock.fetchDocuments).to.have.been.calledOnceWith(
+    expect(dapiClientMock.getDocuments).to.have.been.calledOnceWith(
       dataContract.getId(),
       'domain',
       {
@@ -44,14 +44,14 @@ describe('resolveByRecordMethodFactory', () => {
       },
     );
 
-    expect(dppMock.document.createFromObject).to.have.been.calledOnceWithExactly(
-      parentDocument.toJSON(),
+    expect(dppMock.document.createFromSerialized).to.have.been.calledOnceWithExactly(
+      parentDocument.serialize(),
       { skipValidation: true },
     );
   });
 
   it('should throw an error if no documents found', async () => {
-    dapiClientMock.fetchDocuments.resolves([]);
+    dapiClientMock.getDocuments.resolves([]);
 
     try {
       await resolveByRecordMethod('name', 'value');
