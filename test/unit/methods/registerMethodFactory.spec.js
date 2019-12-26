@@ -114,10 +114,10 @@ describe('registerMethodFactory', () => {
       dashIdentity: identity.getId(),
     });
     const nameHash = hash(
-      Buffer.from(`${name.toLowerCase()}.`),
+      Buffer.from(name.toLowerCase()),
     ).toString('hex');
 
-    const saltedDomainHash = '56177072656f7264657253616c745609736f6d656e616d652e';
+    const saltedDomainHash = '56167072656f7264657253616c745608736f6d656e616d65';
 
     expect(dppMock.document.create.getCall(0).args).to.deep.equal([
       dataContract,

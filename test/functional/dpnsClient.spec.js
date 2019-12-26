@@ -210,7 +210,7 @@ describe('DPNS client', function main() {
       dashIdentity: dpnsUserIdentityMock.getId(),
     });
 
-    const domainDocument = await dpnsClient.resolve('dash.');
+    const domainDocument = await dpnsClient.resolve('dash');
 
     expect(domainDocument.data.label).to.equal('dash');
     expect(domainDocument.data.normalizedParentDomainName).to.equal('');
@@ -226,14 +226,14 @@ describe('DPNS client', function main() {
     });
 
     const userDPNSClient = new DPNSClient(dapiClient, walletMock);
-    await userDPNSClient.register('wallet.dash.', userIdentityMock, {
+    await userDPNSClient.register('wallet.dash', userIdentityMock, {
       dashIdentity: userIdentityMock.getId(),
     });
 
-    const domainDocument = await userDPNSClient.resolve('wallet.dash.');
+    const domainDocument = await userDPNSClient.resolve('wallet.dash');
 
     expect(domainDocument.data.label).to.equal('wallet');
-    expect(domainDocument.data.normalizedParentDomainName).to.equal('dash.');
+    expect(domainDocument.data.normalizedParentDomainName).to.equal('dash');
     expect(domainDocument.data.records).to.deep.equal({
       dashIdentity: userIdentityMock.getId(),
     });
