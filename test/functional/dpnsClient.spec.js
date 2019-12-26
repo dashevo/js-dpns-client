@@ -112,6 +112,8 @@ describe('DPNS client', function main() {
   let dapiInstance;
   let dapiClient;
   let dpp;
+  let dpnsWalletMock;
+  let dpnsUserIdentityMock;
   let walletMock;
   let userIdentityMock;
 
@@ -121,6 +123,7 @@ describe('DPNS client', function main() {
         container: {
           envs: [
             'DPNS_CONTRACT_ID=BEy2dxPtrwFLP2s6a5iXmSruvjoEpH2x4fQK4eVN8VM7',
+            'DPNS_TOP_LEVEL_IDENTITY=BEy2dxPtrwFLP2s6a5iXmSruvjoEpH2x4fQK4eVN8VM7',
           ],
         },
       },
@@ -128,6 +131,7 @@ describe('DPNS client', function main() {
         container: {
           envs: [
             'DPNS_CONTRACT_ID=BEy2dxPtrwFLP2s6a5iXmSruvjoEpH2x4fQK4eVN8VM7',
+            'DPNS_TOP_LEVEL_IDENTITY=BEy2dxPtrwFLP2s6a5iXmSruvjoEpH2x4fQK4eVN8VM7',
           ],
         },
       },
@@ -163,6 +167,17 @@ describe('DPNS client', function main() {
       outPoint: '5VBUIlJC884kZrZ5eHXVrXw1Gwv/gHnVyyMVyjGJc3oAAAAA',
     });
 
+    dpnsWalletMock = {
+      getAccount: () => ({
+        getIdentityPrivateKey: () => dpnsPrivateKey,
+      }),
+    };
+
+    dpnsUserIdentityMock = {
+      getId: () => dpnsIdentityId,
+      getPublicKeyById: () => dpnsPublicKey,
+    };
+
     process.env.DPNS_IDENTITY_ID = dpnsIdentityId;
 
     const dataContract = dpp.dataContract.create(dpnsIdentityId, dpnsDocuments);
@@ -190,31 +205,32 @@ describe('DPNS client', function main() {
   });
 
   it('should be able to register and resolve a domain', async () => {
-    const dpnsClient = new DPNSClient(dapiClient, walletMock);
-    await dpnsClient.register('dash', userIdentityMock, {
-      dashIdentity: userIdentityMock.getId(),
+    const dpnsClient = new DPNSClient(dapiClient, dpnsWalletMock);
+    await dpnsClient.register('dash', dpnsUserIdentityMock, {
+      dashIdentity: dpnsUserIdentityMock.getId(),
     });
 
-    const domainDocument = await dpnsClient.resolve('dash');
+    const domainDocument = await dpnsClient.resolve('dash.');
 
     expect(domainDocument.data.label).to.equal('dash');
     expect(domainDocument.data.normalizedParentDomainName).to.equal('');
     expect(domainDocument.data.records).to.deep.equal({
-      dashIdentity: userIdentityMock.getId(),
+      dashIdentity: dpnsUserIdentityMock.getId(),
     });
   });
 
   it('should be able to register lower level domain', async () => {
-    const dpnsClient = new DPNSClient(dapiClient, walletMock);
-    await dpnsClient.register('dash', userIdentityMock, {
+    const dpnsClient = new DPNSClient(dapiClient, dpnsWalletMock);
+    await dpnsClient.register('dash', dpnsUserIdentityMock, {
+      dashIdentity: dpnsUserIdentityMock.getId(),
+    });
+
+    const userDPNSClient = new DPNSClient(dapiClient, walletMock);
+    await userDPNSClient.register('wallet.dash', userIdentityMock, {
       dashIdentity: userIdentityMock.getId(),
     });
 
-    await dpnsClient.register('wallet.dash', userIdentityMock, {
-      dashIdentity: userIdentityMock.getId(),
-    });
-
-    const domainDocument = await dpnsClient.resolve('wallet.dash');
+    const domainDocument = await userDPNSClient.resolve('wallet.dash');
 
     expect(domainDocument.data.label).to.equal('wallet');
     expect(domainDocument.data.normalizedParentDomainName).to.equal('dash');
@@ -224,9 +240,9 @@ describe('DPNS client', function main() {
   });
 
   it('should be able to search a domain', async () => {
-    const dpnsClient = new DPNSClient(dapiClient, walletMock);
-    await dpnsClient.register('dash', userIdentityMock, {
-      dashIdentity: userIdentityMock.getId(),
+    const dpnsClient = new DPNSClient(dapiClient, dpnsWalletMock);
+    await dpnsClient.register('dash', dpnsUserIdentityMock, {
+      dashIdentity: dpnsUserIdentityMock.getId(),
     });
 
     const [domainDocument] = await dpnsClient.search('da');
@@ -239,17 +255,17 @@ describe('DPNS client', function main() {
   });
 
   it('should be able to resolve domain by it\'s record', async () => {
-    const dpnsClient = new DPNSClient(dapiClient, walletMock);
-    await dpnsClient.register('dash', userIdentityMock, {
-      dashIdentity: userIdentityMock.getId(),
+    const dpnsClient = new DPNSClient(dapiClient, dpnsWalletMock);
+    await dpnsClient.register('dash', dpnsUserIdentityMock, {
+      dashIdentity: dpnsUserIdentityMock.getId(),
     });
 
-    const domainDocument = await dpnsClient.resolveByRecord('dashIdentity', userIdentityMock.getId());
+    const domainDocument = await dpnsClient.resolveByRecord('dashIdentity', dpnsUserIdentityMock.getId());
 
     expect(domainDocument.data.label).to.equal('dash');
     expect(domainDocument.data.normalizedParentDomainName).to.equal('');
     expect(domainDocument.data.records).to.deep.equal({
-      dashIdentity: userIdentityMock.getId(),
+      dashIdentity: dpnsUserIdentityMock.getId(),
     });
   });
 
