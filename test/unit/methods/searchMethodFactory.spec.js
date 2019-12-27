@@ -5,24 +5,27 @@ const createDataProviderMock = require('../../../lib/test/mocks/createDapiClient
 const dpnsDocumentFixture = require('../../../lib/test/fixtures/getDpnsDocumentFixture');
 const searchMethodFactory = require('../../../lib/method/searchMethodFactory');
 
+const getDpnsContractFixture = require('../../../lib/test/fixtures/getDpnsContractFixture');
+
 describe('searchMethodFactory', () => {
   let dapiClientMock;
   let dppMock;
   let parentDocument;
   let searchMethod;
+  let dataContract;
 
   beforeEach(function beforeEach() {
     dapiClientMock = createDataProviderMock(this.sinon);
     parentDocument = dpnsDocumentFixture.getParentDocumentFixture();
-    dapiClientMock.fetchDocuments
-      .resolves([parentDocument.toJSON()]);
+    dapiClientMock.getDocuments
+      .resolves([parentDocument.serialize()]);
 
     dppMock = createDPPMock(this.sinon);
-    dppMock.getContract.returns({
-      getId: () => 'someContractId',
-    });
+    dppMock.document.createFromSerialized.returns(parentDocument);
 
-    searchMethod = searchMethodFactory(dapiClientMock, dppMock);
+    dataContract = getDpnsContractFixture();
+
+    searchMethod = searchMethodFactory(dapiClientMock, dppMock, dataContract);
   });
 
   it('should return array of documents', async () => {
@@ -34,15 +37,20 @@ describe('searchMethodFactory', () => {
     expect(result[0]).to.be.instanceOf(Document);
     expect(result[0]).to.deep.include(parentDocument);
 
-    expect(dapiClientMock.fetchDocuments).to.have.been.calledOnceWith(
-      dppMock.getContract().getId(),
+    expect(dapiClientMock.getDocuments).to.have.been.calledOnceWithExactly(
+      dataContract.getId(),
       'domain',
       {
         where: [
           ['normalizedParentDomainName', '==', 'parentDomainName'.toLowerCase()],
-          ['normalizedLabel', 'startWith', 'labelPrefix'],
+          ['normalizedLabel', 'startsWith', 'labelPrefix'],
         ],
       },
+    );
+
+    expect(dppMock.document.createFromSerialized).to.have.been.calledOnceWithExactly(
+      parentDocument.serialize(),
+      { skipValidation: true },
     );
   });
 });

@@ -3,3 +3,6 @@
 
 # do not track dependencies
 node_modules
+
+# env file
+.env

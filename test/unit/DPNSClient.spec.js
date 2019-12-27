@@ -1,166 +1,75 @@
-const Document = require('@dashevo/dpp/lib/document/Document');
-const Contract = require('@dashevo/dpp/lib/contract/Contract');
+const rewiremock = require('rewiremock/node');
 
-const dpnsDocuments = require('@dashevo/dpns-contract/src/schema/dpns-documents');
+const createDPPMock = require('@dashevo/dpp/lib/test/mocks/createDPPMock');
 
-const DPNSClient = require('../../lib/DPNSClient');
-
-const dpnsDocumentFixture = require('../../lib/test/fixtures/getDpnsDocumentFixture');
-const InvalidArgumentError = require('../../lib/errors/InvalidArgumentError');
+const getDpnsContractFixture = require('../../lib/test/fixtures/getDpnsContractFixture');
+const getDpnsDocumentFixture = require('../../lib/test/fixtures/getDpnsDocumentFixture');
 
 describe('DPNSClient', () => {
   let parentDocument;
-  let dpnsClient;
+  let DPNSClient;
+  let registerMethodFactoryMock;
+  let resolveMethodFactoryMock;
+  let resolveByRecordMethodFactoryMock;
+  let searchMethodFactoryMock;
+  let dppMock;
+  let dataContract;
 
   beforeEach(function beforeEach() {
-    parentDocument = dpnsDocumentFixture.getParentDocumentFixture();
+    dataContract = getDpnsContractFixture();
+    parentDocument = getDpnsDocumentFixture.getParentDocumentFixture();
 
-    dpnsClient = new DPNSClient(null, null, null);
-    dpnsClient.registerMethod = this.sinon.stub().resolves(parentDocument);
-    dpnsClient.resolveMethod = this.sinon.stub().resolves(parentDocument);
-    dpnsClient.resolveByRecordMethod = this.sinon.stub().resolves(parentDocument);
-    dpnsClient.searchMethod = this.sinon.stub().resolves([parentDocument]);
+    dppMock = createDPPMock(this.sinon);
+    dppMock.dataContract.create.returns(dataContract);
+
+    const dppClassMock = this.sinon.stub();
+    dppClassMock.returns(dppMock);
+
+    registerMethodFactoryMock = this.sinon.stub();
+    registerMethodFactoryMock.returns(() => parentDocument);
+
+    resolveMethodFactoryMock = this.sinon.stub();
+    resolveMethodFactoryMock.returns(() => parentDocument);
+
+    resolveByRecordMethodFactoryMock = this.sinon.stub();
+    resolveByRecordMethodFactoryMock.returns(() => parentDocument);
+
+    searchMethodFactoryMock = this.sinon.stub();
+    searchMethodFactoryMock.returns(() => parentDocument);
+
+    DPNSClient = rewiremock.proxy('../../lib/DPNSClient', {
+      '../../node_modules/@dashevo/dpp': dppClassMock,
+      '../../lib/method/registerMethodFactory': registerMethodFactoryMock,
+      '../../lib/method/resolveMethodFactory': resolveMethodFactoryMock,
+      '../../lib/method/resolveByRecordMethodFactory': resolveByRecordMethodFactoryMock,
+      '../../lib/method/searchMethodFactory': searchMethodFactoryMock,
+    });
   });
 
   describe('#constructor', () => {
-    it('should set arguments correctly', () => {
+    it('should set arguments and create methods correctly', () => {
       const dapiClient = { name: 'dapiClient' };
       const wallet = { name: 'wallet' };
-      const blockchainIdentity = { name: 'blockchainIdentity' };
+      const identity = { name: 'identity' };
 
-      dpnsClient = new DPNSClient(dapiClient, wallet, blockchainIdentity);
+      // eslint-disable-next-line no-unused-vars
+      const dpnsClient = new DPNSClient(dapiClient, wallet, identity);
 
-      expect(dpnsClient.dapiClient).to.deep.equal(dapiClient);
-      expect(dpnsClient.wallet).to.deep.equal(wallet);
-      expect(dpnsClient.dpp.getContract()).to.deep.equal(
-        new Contract('dpnsContract', dpnsDocuments),
-      );
-    });
-  });
-
-  describe('#register', () => {
-    it('should throw an error if `name` is not specified', async () => {
-      try {
-        await dpnsClient.register('');
-
-        expect.fail('Error has not been thrown');
-      } catch (e) {
-        expect(e).to.be.an.instanceOf(InvalidArgumentError);
-        expect(e.message).to.equal('Invalid argument: name');
-      }
-    });
-
-    it('should return a document', async () => {
-      const name = 'name';
-
-      const result = await dpnsClient.register(name);
-
-      expect(dpnsClient.registerMethod).to.have.been.calledWith(name);
-
-      expect(result).to.be.an.instanceOf(Document);
-      expect(result).to.equal(parentDocument);
-    });
-  });
-
-  describe('#resolve', () => {
-    it('should throw an error if `name` argument is missing', async () => {
-      try {
-        await dpnsClient.resolve('');
-
-        expect.fail('Error has not been thrown');
-      } catch (e) {
-        expect(e).to.be.an.instanceOf(InvalidArgumentError);
-        expect(e.message).to.equal('Invalid argument: name');
-      }
-    });
-
-    it('should return a document', async () => {
-      const name = 'someName';
-
-      const result = await dpnsClient.resolve(name);
-
-      expect(dpnsClient.resolveMethod).to.have.been.calledWith(name);
-
-      expect(result).to.be.an.instanceOf(Document);
-      expect(result).to.be.equal(parentDocument);
-    });
-  });
-
-  describe('#resolveByRecord', () => {
-    it('should throw an error if `record` parameter is missing', async () => {
-      try {
-        await dpnsClient.resolveByRecord('', 'value');
-
-        expect.fail('Error has not been thrown');
-      } catch (e) {
-        expect(e).to.be.an.instanceOf(InvalidArgumentError);
-        expect(e.message).to.equal('Invalid argument: record');
-      }
-    });
-
-    it('should throw an error if `value` parameter is missing', async () => {
-      try {
-        await dpnsClient.resolveByRecord('record', '');
-
-        expect.fail('Error has not been thrown');
-      } catch (e) {
-        expect(e).to.be.an.instanceOf(InvalidArgumentError);
-        expect(e.message).to.equal('Invalid argument: value');
-      }
-    });
-
-    it('should return a document', async () => {
-      const recordName = 'record';
-      const recordValue = 'value';
-
-      const result = await dpnsClient.resolveByRecord(recordName, recordValue);
-
-      expect(dpnsClient.resolveByRecordMethod).to.have.been.calledWith(
-        recordName, recordValue,
+      expect(registerMethodFactoryMock).to.have.been.calledOnceWithExactly(
+        dapiClient, dppMock, wallet, dataContract,
       );
 
-      expect(result).to.be.an.instanceOf(Document);
-      expect(result).to.equal(parentDocument);
-    });
-  });
-
-  describe('#search', () => {
-    it('should throw an error if `labelPrefix` parameter is missing', async () => {
-      try {
-        await dpnsClient.search('', 'parentDomainName');
-
-        expect.fail('Error has not been thrown');
-      } catch (e) {
-        expect(e).to.be.an.instanceOf(InvalidArgumentError);
-        expect(e.message).to.equal('Invalid argument: labelPrefix');
-      }
-    });
-
-    it('should throw an error if `parentDomainName` parameter is missing', async () => {
-      try {
-        await dpnsClient.search('labelPrefix', '');
-
-        expect.fail('Error has not been thrown');
-      } catch (e) {
-        expect(e).to.be.an.instanceOf(InvalidArgumentError);
-        expect(e.message).to.equal('Invalid argument: parentDomainName');
-      }
-    });
-
-    it('should return an array of documents', async () => {
-      const labelPrefix = 'labelPrefix';
-      const parentDomainName = 'parentDomainName';
-
-      const result = await dpnsClient.search(labelPrefix, parentDomainName);
-
-      expect(dpnsClient.searchMethod).to.have.been.calledWith(
-        labelPrefix, parentDomainName,
+      expect(resolveMethodFactoryMock).to.have.been.calledOnceWithExactly(
+        dapiClient, dppMock, dataContract,
       );
 
-      expect(result).to.be.an('array');
-      expect(result).to.have.lengthOf(1);
-      expect(result[0]).to.be.an.instanceOf(Document);
-      expect(result[0]).to.equal(parentDocument);
+      expect(resolveByRecordMethodFactoryMock).to.have.been.calledOnceWithExactly(
+        dapiClient, dppMock, dataContract,
+      );
+
+      expect(searchMethodFactoryMock).to.have.been.calledOnceWithExactly(
+        dapiClient, dppMock, dataContract,
+      );
     });
   });
 });

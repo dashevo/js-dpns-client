@@ -1,122 +1,181 @@
+const rewiremock = require('rewiremock/node');
+
+const bs58 = require('bs58');
+
 const Document = require('@dashevo/dpp/lib/document/Document');
 const createDPPMock = require('@dashevo/dpp/lib/test/mocks/createDPPMock');
 const { hash } = require('@dashevo/dpp/lib/util/multihashDoubleSHA256');
+const getIdentityFixture = require('@dashevo/dpp/lib/test/fixtures/getIdentityFixture');
+
 const { PrivateKey } = require('@dashevo/dashcore-lib');
 
-const registerMethodFactory = require('../../../lib/method/registerMethodFactory');
-const dpnsDocumentFixture = require('../../../lib/test/fixtures/getDpnsDocumentFixture');
 const createDapiClientMock = require('../../../lib/test/mocks/createDapiClientMock');
 const createWalletMock = require('../../../lib/test/mocks/createWalletMock');
+
 const { getParentDocumentFixture } = require('../../../lib/test/fixtures/getDpnsDocumentFixture');
+const getDpnsContractFixture = require('../../../lib/test/fixtures/getDpnsContractFixture');
 
 describe('registerMethodFactory', () => {
   let dapiClientMock;
   let dppMock;
   let parentDocument;
-  let preorderDocument;
   let walletMock;
   let registerMethod;
-  let blockchainIdentity;
+  let identity;
+  let dataContract;
   let privateKey;
-  let prevSTHash;
-  let preorderTransitionHash;
+  let preorderSalt;
 
   beforeEach(function beforeEach() {
+    dataContract = getDpnsContractFixture();
+    identity = getIdentityFixture();
+
     dapiClientMock = createDapiClientMock(this.sinon);
 
-    parentDocument = dpnsDocumentFixture.getParentDocumentFixture({ type: 'domain' });
-    preorderDocument = getParentDocumentFixture({ type: 'preorder' });
+    parentDocument = getParentDocumentFixture({ type: 'domain' });
 
     privateKey = new PrivateKey();
-    prevSTHash = 'ac5784e7dd8fc9f1b638a353fb10015d3841bb9076c20e2ebefc3e97599e92b5';
-    preorderTransitionHash = 'ac5784e7dd8fc9f1b638a353fb10015d3841bb9076c20e2ebefc3e97599e92b5';
 
-    dapiClientMock.fetchDocuments
-      .resolves([parentDocument.toJSON()]);
-    dapiClientMock.getLastUserStateTransitionHash
-      .resolves(prevSTHash);
-    dapiClientMock.sendRawTransition
-      .resolves(preorderTransitionHash);
+    dapiClientMock.getDocuments
+      .resolves([parentDocument.serialize()]);
+    dapiClientMock.applyStateTransition = this.sinon.stub();
 
     walletMock = createWalletMock(this.sinon);
     walletMock.getAccount.returns({
       getIdentityPrivateKey: () => privateKey,
     });
 
-    dppMock = createDPPMock(this.sinon);
-    dppMock.getContract.returns({
-      getId: () => 'someContratId',
-    });
-
-    dppMock.packet.validate.returns({
-      isValid: () => true,
-    });
-
-    dppMock.packet.create.returns({
-      hash: () => 'ac5784e7dd8fc9f1b638a353fb10015d3841bb9076c20e2ebefc3e97599e92b5',
-      serialize: () => 'ac5784e7dd8fc9f1b638a353fb10015d3841bb9076c20e2ebefc3e97599e92b5',
-    });
-
-    dppMock.document.create
-      .withArgs('preorder', this.sinon.match.any)
-      .returns(preorderDocument);
-    dppMock.document.create
-      .withArgs('domain', this.sinon.match.any)
-      .returns(parentDocument);
-
-    blockchainIdentity = {
-      regTxId: 'ac5784e7dd8fc9f1b638a353fb10015d3841bb9076c20e2ebefc3e97599e92b5',
+    const preorderDocumentMock = {
+      type: 'preorder',
     };
 
-    registerMethod = registerMethodFactory(dapiClientMock, dppMock, walletMock, blockchainIdentity);
+    dppMock = createDPPMock(this.sinon);
+
+    dppMock.document.create
+      .withArgs(
+        dataContract,
+        identity.getId(),
+        'preorder',
+        this.sinon.match.any,
+      )
+      .returns(preorderDocumentMock);
+
+    dppMock.document.create
+      .withArgs(
+        dataContract,
+        identity.getId(),
+        'domain',
+        this.sinon.match.any,
+      )
+      .returns(parentDocument);
+
+    dppMock.document.createStateTransition = this.sinon.stub();
+
+    dppMock.document.createStateTransition
+      .withArgs([preorderDocumentMock])
+      .returns({
+        sign: this.sinon.stub(),
+      });
+
+    dppMock.document.createStateTransition
+      .withArgs([parentDocument])
+      .returns({
+        sign: this.sinon.stub(),
+      });
+
+    dppMock.document.createFromObject.returns(parentDocument);
+
+    preorderSalt = bs58.encode(
+      Buffer.from('preorderSalt'),
+    );
+
+    const entropyMock = {
+      generate: () => preorderSalt,
+    };
+
+    const registerMethodFactory = rewiremock.proxy(
+      '../../../lib/method/registerMethodFactory',
+      {
+        '../../../node_modules/@dashevo/dpp/lib/util/entropy': entropyMock,
+      },
+    );
+
+    registerMethod = registerMethodFactory(
+      dapiClientMock,
+      dppMock,
+      walletMock,
+      dataContract,
+    );
   });
 
   it('should return a document', async () => {
     const name = 'someName';
-    const result = await registerMethod(name);
-    const nameHash = hash(Buffer.from(name)).toString('hex');
+    const result = await registerMethod(name, identity, {
+      dashIdentity: identity.getId(),
+    });
+    const nameHash = hash(
+      Buffer.from(name.toLowerCase()),
+    ).toString('hex');
 
-    expect(dapiClientMock.fetchDocuments).to.have.been.calledTwice();
-    expect(dapiClientMock.fetchDocuments.getCall(0)).to.have.been.calledWith(
-      dppMock.getContract().getId(),
-      'preorder',
-      { where: [['saltedDomainHash', '==', preorderDocument.getData().saltedDomainHash]] },
-    );
-    expect(dapiClientMock.fetchDocuments.getCall(1)).to.have.been.calledWith(
-      dppMock.getContract().getId(),
-      'domain',
-      { where: [['nameHash', '==', nameHash]] },
-    );
+    const saltedDomainHash = '56167072656f7264657253616c745608736f6d656e616d65';
+
+    expect(dppMock.document.create.getCall(0).args).to.deep.equal([
+      dataContract,
+      identity.getId(),
+      'preorder', {
+        saltedDomainHash,
+      },
+    ]);
+
+    expect(dppMock.document.create.getCall(1).args).to.deep.equal([
+      dataContract,
+      identity.getId(),
+      'domain', {
+        nameHash,
+        label: name,
+        normalizedLabel: name.toLowerCase(),
+        normalizedParentDomainName: '',
+        preorderSalt,
+        records: {
+          dashIdentity: identity.getId(),
+        },
+      },
+    ]);
 
     expect(result).to.be.an.instanceOf(Document);
     expect(result).to.be.equal(parentDocument);
   });
 
-  it('should throw an error if `preorder` packet is invalid', async () => {
-    dppMock.packet.validate.onCall(0).returns({
-      isValid: () => false,
-    });
-
+  it('should throw an error if name is missing', async () => {
     try {
-      await registerMethod('someName');
+      await registerMethod();
 
       expect.fail('Error has not been thrown');
     } catch (e) {
-      expect(e.message).to.equal('Preorder packet is not valid');
+      expect(e).to.be.an.instanceOf(Error);
+      expect(e.message).to.equal('Invalid argument: name');
     }
   });
 
-  it('should throw an error if `domain` packet is invalid', async () => {
-    dppMock.packet.validate.onCall(1).returns({
-      isValid: () => false,
-    });
-
+  it('should throw an error if user is missing', async () => {
     try {
-      await registerMethod('someName');
+      await registerMethod('name');
 
       expect.fail('Error has not been thrown');
     } catch (e) {
-      expect(e.message).to.equal('Domain packet is not valid');
+      expect(e).to.be.an.instanceOf(Error);
+      expect(e.message).to.equal('Invalid argument: user');
+    }
+  });
+
+  it('should throw an error if records is missing', async () => {
+    try {
+      await registerMethod('name', identity);
+
+      expect.fail('Error has not been thrown');
+    } catch (e) {
+      expect(e).to.be.an.instanceOf(Error);
+      expect(e.message).to.equal('Invalid argument: records');
     }
   });
 });

@@ -34,4 +34,4 @@ deploy:
   script: bash bin/travis-deploy.sh
   on:
     tags: true
-    repo: dashevo/js-dpns-contract
+    repo: dashevo/js-dpns-client

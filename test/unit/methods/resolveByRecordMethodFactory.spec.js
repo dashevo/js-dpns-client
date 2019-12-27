@@ -2,27 +2,30 @@ const Document = require('@dashevo/dpp/lib/document/Document');
 const createDPPMock = require('@dashevo/dpp/lib/test/mocks/createDPPMock');
 
 const createDapiClientMock = require('../../../lib/test/mocks/createDapiClientMock');
-const dpnsDocumentFixture = require('../../../lib/test/fixtures/getDpnsDocumentFixture');
+
+const getDpnsDocumentFixture = require('../../../lib/test/fixtures/getDpnsDocumentFixture');
+const getDpnsContractFixture = require('../../../lib/test/fixtures/getDpnsContractFixture');
+
 const resolveByRecordMethodFactory = require('../../../lib/method/resolveByRecordMethodFactory');
 
 describe('resolveByRecordMethodFactory', () => {
   let dapiClientMock;
   let dppMock;
   let parentDocument;
+  let dataContract;
   let resolveByRecordMethod;
 
   beforeEach(function beforeEach() {
     dapiClientMock = createDapiClientMock(this.sinon);
-    parentDocument = dpnsDocumentFixture.getParentDocumentFixture();
-    dapiClientMock.fetchDocuments
-      .resolves([parentDocument.toJSON()]);
+    parentDocument = getDpnsDocumentFixture.getParentDocumentFixture();
+    dataContract = getDpnsContractFixture();
+    dapiClientMock.getDocuments
+      .resolves([parentDocument.serialize()]);
 
     dppMock = createDPPMock(this.sinon);
-    dppMock.getContract.returns({
-      getId: () => 'someContractId',
-    });
+    dppMock.document.createFromSerialized.returns(parentDocument);
 
-    resolveByRecordMethod = resolveByRecordMethodFactory(dapiClientMock, dppMock);
+    resolveByRecordMethod = resolveByRecordMethodFactory(dapiClientMock, dppMock, dataContract);
   });
 
   it('should return a document', async () => {
@@ -31,19 +34,24 @@ describe('resolveByRecordMethodFactory', () => {
     expect(result).to.be.an.instanceOf(Document);
     expect(result).to.deep.equal(parentDocument);
 
-    expect(dapiClientMock.fetchDocuments).to.have.been.calledOnceWith(
-      dppMock.getContract().getId(),
+    expect(dapiClientMock.getDocuments).to.have.been.calledOnceWith(
+      dataContract.getId(),
       'domain',
       {
         where: [
-          ['record.name', '==', 'value'],
+          ['records.name', '==', 'value'],
         ],
       },
+    );
+
+    expect(dppMock.document.createFromSerialized).to.have.been.calledOnceWithExactly(
+      parentDocument.serialize(),
+      { skipValidation: true },
     );
   });
 
   it('should throw an error if no documents found', async () => {
-    dapiClientMock.fetchDocuments.resolves([]);
+    dapiClientMock.getDocuments.resolves([]);
 
     try {
       await resolveByRecordMethod('name', 'value');
