@@ -21,6 +21,10 @@ addons:
     packages:
       - docker-ce
 
+before_install:
+  # Login to NPM registry
+  - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
+
 install:
   - npm ci
 
@@ -31,6 +35,7 @@ script:
 
 deploy:
   provider: script
+  skip_cleanup: true
   script: bash bin/travis-deploy.sh
   on:
     tags: true
