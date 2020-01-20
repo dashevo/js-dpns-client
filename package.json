@@ -1,6 +1,6 @@
 {
   "name": "@dashevo/dpns-client",
-  "version": "0.2.0-dev.1",
+  "version": "0.2.0-dev.2",
   "description": "Javascript client for DPNS",
   "main": "lib/DPNSClient.js",
   "directories": {
@@ -47,7 +47,7 @@
     "@dashevo/dapi-client": "^0.8.0-dev.14",
     "@dashevo/dashcore-lib": "^0.18.0",
     "@dashevo/dpns-contract": "^0.2.0-dev.3",
-    "@dashevo/dpp": "^0.10.0-dev.13",
+    "@dashevo/dpp": "^0.10.0-dev.15",
     "bs58": "^4.0.1"
   }
 }
