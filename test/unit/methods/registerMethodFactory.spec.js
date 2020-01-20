@@ -117,7 +117,7 @@ describe('registerMethodFactory', () => {
       Buffer.from(name.toLowerCase()),
     ).toString('hex');
 
-    const saltedDomainHash = '56167072656f7264657253616c745608736f6d656e616d65';
+    const saltedDomainHash = '5620417d36ca8defa4179ed4ab12a5e1a9b7a1e20b6a9c4932ef72d362634dd1bb22';
 
     expect(dppMock.document.create.getCall(0).args).to.deep.equal([
       dataContract,
