@@ -15,6 +15,7 @@
     "test": "npm run test:unit && npm run test:functional",
     "test:unit": "mocha 'test/unit/**/*.spec.js'",
     "test:functional": "mocha 'test/functional/**/*.spec.js'"
+    "test:browsers": "karma start ./karma.conf.js --single-run"
   },
   "repository": {
     "type": "git",
@@ -38,10 +39,19 @@
     "eslint": "^6.7.2",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.19.1",
+    "karma": "^4.4.1",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^3.1.0",
+    "karma-firefox-launcher": "^1.3.0",
+    "karma-mocha": "^1.3.0",
+    "karma-mocha-reporter": "^2.2.5",
+    "karma-webpack": "^4.0.2",
     "mocha": "^6.2.2",
     "rewiremock": "^3.13.9",
     "sinon": "^7.5.0",
-    "sinon-chai": "^3.3.0"
+    "sinon-chai": "^3.3.0",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10"
   },
   "dependencies": {
     "@dashevo/dapi-client": "^0.8.0-dev.14",
