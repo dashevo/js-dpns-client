@@ -14,8 +14,20 @@
 
 ## Install
 
+### Node
+In order to use this library, you will need to add it to your project as a dependency.
+
+Having NodeJS installed, just type in your terminal :
+
 ```sh
 npm install @dashevo/dpns-client
+```
+
+### CDN Standalone
+For browser usage, you can also directly rely on unpkg :
+
+```html
+<script src="https://unpkg.com/@dashevo/dpns-client"></script>
 ```
 
 ## Usage
