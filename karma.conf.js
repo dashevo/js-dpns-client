@@ -1,3 +1,8 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
+const webpack = require('webpack');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const RewiremockPlugin = require('rewiremock/webpack/plugin');
+
 module.exports = (config) => {
   config.set({
     basePath: '',
@@ -13,10 +18,7 @@ module.exports = (config) => {
       './test.spec.js': ['webpack'],
     },
     webpack: {
-      mode: 'production',
-      node: {
-        fs: 'empty',
-      },
+      mode: 'development',
       module: {
         rules: [
           {
@@ -25,6 +27,11 @@ module.exports = (config) => {
           },
         ],
       },
+      plugins: [
+        new webpack.NamedModulesPlugin(),
+        new webpack.HotModuleReplacementPlugin(),
+        new RewiremockPlugin(),
+      ],
     },
     reporters: ['mocha'],
     port: 9876,
