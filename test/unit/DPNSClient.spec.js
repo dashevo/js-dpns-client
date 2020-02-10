@@ -36,12 +36,12 @@ describe('DPNSClient', () => {
     searchMethodFactoryMock = this.sinon.stub();
     searchMethodFactoryMock.returns(() => parentDocument);
 
-    DPNSClient = rewiremock.proxy('../lib/DPNSClient', {
-      '../node_modules/@dashevo/dpp': dppClassMock,
-      '../lib/method/registerMethodFactory': registerMethodFactoryMock,
-      '../lib/method/resolveMethodFactory': resolveMethodFactoryMock,
-      '../lib/method/resolveByRecordMethodFactory': resolveByRecordMethodFactoryMock,
-      '../lib/method/searchMethodFactory': searchMethodFactoryMock,
+    DPNSClient = rewiremock.proxy('../../lib/DPNSClient', {
+      '../../node_modules/@dashevo/dpp': dppClassMock,
+      '../../lib/method/registerMethodFactory': registerMethodFactoryMock,
+      '../../lib/method/resolveMethodFactory': resolveMethodFactoryMock,
+      '../../lib/method/resolveByRecordMethodFactory': resolveByRecordMethodFactoryMock,
+      '../../lib/method/searchMethodFactory': searchMethodFactoryMock,
     });
   });
 
