@@ -1,6 +1,5 @@
-const rewiremock = require('rewiremock/node');
-
 const createDPPMock = require('@dashevo/dpp/lib/test/mocks/createDPPMock');
+const rewiremock = require('../rewiremock.utils');
 
 const getDpnsContractFixture = require('../../lib/test/fixtures/getDpnsContractFixture');
 const getDpnsDocumentFixture = require('../../lib/test/fixtures/getDpnsDocumentFixture');
@@ -37,12 +36,12 @@ describe('DPNSClient', () => {
     searchMethodFactoryMock = this.sinon.stub();
     searchMethodFactoryMock.returns(() => parentDocument);
 
-    DPNSClient = rewiremock.proxy('../../lib/DPNSClient', {
-      '../../node_modules/@dashevo/dpp': dppClassMock,
-      '../../lib/method/registerMethodFactory': registerMethodFactoryMock,
-      '../../lib/method/resolveMethodFactory': resolveMethodFactoryMock,
-      '../../lib/method/resolveByRecordMethodFactory': resolveByRecordMethodFactoryMock,
-      '../../lib/method/searchMethodFactory': searchMethodFactoryMock,
+    DPNSClient = rewiremock.proxy('../lib/DPNSClient', {
+      '../node_modules/@dashevo/dpp': dppClassMock,
+      '../lib/method/registerMethodFactory': registerMethodFactoryMock,
+      '../lib/method/resolveMethodFactory': resolveMethodFactoryMock,
+      '../lib/method/resolveByRecordMethodFactory': resolveByRecordMethodFactoryMock,
+      '../lib/method/searchMethodFactory': searchMethodFactoryMock,
     });
   });
 
