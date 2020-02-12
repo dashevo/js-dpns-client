@@ -1,5 +1,3 @@
-const rewiremock = require('rewiremock/node');
-
 const bs58 = require('bs58');
 
 const Document = require('@dashevo/dpp/lib/document/Document');
@@ -14,6 +12,8 @@ const createWalletMock = require('../../../lib/test/mocks/createWalletMock');
 
 const { getParentDocumentFixture } = require('../../../lib/test/fixtures/getDpnsDocumentFixture');
 const getDpnsContractFixture = require('../../../lib/test/fixtures/getDpnsContractFixture');
+
+const registerMethodFactory = require('../../../lib/method/registerMethodFactory');
 
 describe('registerMethodFactory', () => {
   let dapiClientMock;
@@ -93,17 +93,11 @@ describe('registerMethodFactory', () => {
       generate: () => preorderSalt,
     };
 
-    const registerMethodFactory = rewiremock.proxy(
-      '../../../lib/method/registerMethodFactory',
-      {
-        '../../../node_modules/@dashevo/dpp/lib/util/entropy': entropyMock,
-      },
-    );
-
     registerMethod = registerMethodFactory(
       dapiClientMock,
       dppMock,
       walletMock,
+      entropyMock,
       dataContract,
     );
   });
