@@ -1,6 +1,6 @@
 {
   "name": "@dashevo/dpns-client",
-  "version": "0.2.0-dev.2",
+  "version": "0.2.0-dev.3",
   "description": "Javascript client for DPNS",
   "main": "lib/DPNSClient.js",
   "unpkg": "dist/dpns-client.min.js",
