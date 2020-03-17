@@ -1,6 +1,6 @@
 {
   "name": "@dashevo/dpns-client",
-  "version": "0.2.0-dev.2",
+  "version": "0.2.0-dev.3",
   "description": "Javascript client for DPNS",
   "main": "lib/DPNSClient.js",
   "unpkg": "dist/dpns-client.min.js",
@@ -18,7 +18,8 @@
     "test:unit": "mocha 'test/unit/**/*.spec.js'",
     "test:functional": "mocha 'test/functional/**/*.spec.js'",
     "test:browsers": "karma start ./karma.conf.js --single-run",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "registerDomain": "node scripts/registerDomain.js"
   },
   "repository": {
     "type": "git",
@@ -34,7 +35,7 @@
   },
   "homepage": "https://github.com/dashevo/js-dpns-client#readme",
   "devDependencies": {
-    "@dashevo/dp-services-ctl": "~0.10.0-dev.8",
+    "@dashevo/dp-services-ctl": "~0.11.0",
     "chai": "^4.2.0",
     "dirty-chai": "^2.0.1",
     "dotenv-expand": "^5.1.0",
@@ -53,13 +54,14 @@
     "sinon": "^8.1.1",
     "sinon-chai": "^3.3.0",
     "webpack": "^4.41.5",
-    "webpack-cli": "^3.3.10"
+    "webpack-cli": "^3.3.10",
+    "yargs": "^15.3.1"
   },
   "dependencies": {
-    "@dashevo/dapi-client": "~0.8.0-dev.14",
+    "@dashevo/dapi-client": "~0.9.0-dev.7",
     "@dashevo/dashcore-lib": "~0.18.0",
-    "@dashevo/dpns-contract": "~0.2.0-dev.3",
-    "@dashevo/dpp": "~0.10.0-dev.15",
+    "@dashevo/dpns-contract": "~0.2.0-dev.4",
+    "@dashevo/dpp": "~0.11.0",
     "bs58": "^4.0.1"
   }
 }
