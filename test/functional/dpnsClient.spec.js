@@ -48,23 +48,22 @@ async function registerIdentity(dpp, dashCoreApi, dapiClient, options = {}) {
   const publicKeyHash = PublicKey.fromBuffer(Buffer.from(pubKeyBase, 'base64'))
     ._getID();
 
-  await dashCoreApi.generate(500);
+  await dashCoreApi.generateToAddress(500, addressString);
   await dashCoreApi.sendToAddress(addressString, 10);
-  await dashCoreApi.generate(10);
 
   const { result: unspent } = await dashCoreApi.listUnspent();
   const inputs = unspent.filter((input) => input.address === addressString);
 
   const transaction = new Transaction();
 
-  transaction.from(inputs)
+  transaction.from(inputs.filter((i) => i.amount * (10 ** 8) > 20000)[0])
     .addBurnOutput(10000, publicKeyHash)
     .change(addressString)
     .fee(668)
     .sign(privateKey);
 
   await dashCoreApi.sendrawtransaction(transaction.serialize());
-  await dashCoreApi.generate(1);
+  await dashCoreApi.generateToAddress(1, addressString);
 
   await wait(2000); // wait a couple of seconds for tx to be confirmed
 
@@ -148,7 +147,9 @@ describe('DPNS client', function main() {
     const tendermintRPCClient = tendermintCore.getClient();
 
     // activate everything
-    await dashCoreApi.generate(500);
+    const { result: addressString } = await dashCoreApi.getNewAddress();
+
+    await dashCoreApi.generateToAddress(500, addressString);
 
     const validationlessDPP = new DashPlatformProtocol();
 
