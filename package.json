@@ -34,7 +34,7 @@
   },
   "homepage": "https://github.com/dashevo/js-dpns-client#readme",
   "devDependencies": {
-    "@dashevo/dp-services-ctl": "~0.10.0-dev.8",
+    "@dashevo/dp-services-ctl": "~0.11.0",
     "chai": "^4.2.0",
     "dirty-chai": "^2.0.1",
     "dotenv-expand": "^5.1.0",
