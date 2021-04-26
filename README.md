@@ -3,7 +3,7 @@
 [![Build Status](https://github.com/dashevo/js-dpns-client/actions/workflows/test_and_release.yml/badge.svg)](https://github.com/dashevo/js-dpns-client/actions/workflows/test_and_release.yml)
 [![NPM version](https://img.shields.io/npm/v/@dashevo/dpns-client.svg?style=flat-square)](https://npmjs.org/package/@dashevo/dpns-client)
 
-> Javascript client for DPNS
+Javascript client for DPNS
 
 ## Table of Contents
 
