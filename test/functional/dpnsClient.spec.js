@@ -105,7 +105,7 @@ async function registerIdentity(dpp, dashCoreApi, dapiClient, options = {}) {
   };
 }
 
-describe('DPNS client', function main() {
+describe.skip('DPNS client', function main() {
   this.timeout(360000);
 
   let dapiInstance;
